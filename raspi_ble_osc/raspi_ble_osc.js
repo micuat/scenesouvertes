@@ -8,19 +8,51 @@ var uartReadCharacteristics = ["6e400003b5a3f393e0a9e50e24dcca9e"];
 
 noble.on('stateChange', function(state) {
   if(state === 'poweredOn') {
-    noble.startScanning(["6e400001b5a3f393e0a9e50e24dcca9e"]);
-    console.log('start');
+    var allowDuplicates = true;
+    setInterval(function() {
+      console.log('start scanning');
+      noble.startScanning(["6e400001b5a3f393e0a9e50e24dcca9e"], allowDuplicates);
+      setTimeout(function() {
+        noble.stopScanning();
+      }, 1 * 1000);
+    }, 2 * 1000);
   } else {
+    console.log('stop scanning');
     noble.stopScanning();
-    console.log('stop');
   }
 });
 
+var currentPeripheral = null;
 
 noble.on('discover', function(peripheral) {
+  if(currentPeripheral != null) {
+    return;
+  }
+
   peripheral.connect(function(error) {
+    console.log("connected to: " + peripheral.id + " " + peripheral.address + " " + peripheral.localName);
+
+    peripheral.removeAllListeners('disconnect');
+    peripheral.on('disconnect', function() {
+      console.log("disconnected from: " + peripheral.id);
+    });
+
     peripheral.discoverSomeServicesAndCharacteristics(uartServices, uartReadCharacteristics, function(error, services, characteristics){
+      if(characteristics.length == 0) {
+        peripheral.disconnect();
+      }
+
+      peripheral.removeAllListeners('disconnect');
+      peripheral.on('disconnect', function() {
+        console.log("disconnected from peripheral with UART: " + peripheral.id);
+        currentPeripheral = null;
+      });
+
+      currentPeripheral = peripheral.id;
+      console.log("UART characteristic found on: " + currentPeripheral);
+
       characteristics.forEach(function(ch, chId) {
+
         ch.removeAllListeners('data');
         ch.on('data', function(data) {
           var eulersString = data.toString().slice(0, -2);
