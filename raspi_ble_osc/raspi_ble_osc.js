@@ -6,10 +6,16 @@ var client = new osc.Client('10.10.30.109', 7000);
 var uartServices = [];
 var uartReadCharacteristics = ["6e400003b5a3f393e0a9e50e24dcca9e"];
 
+var currentPeripheral = null;
+
 noble.on('stateChange', function(state) {
   if(state === 'poweredOn') {
-    var allowDuplicates = true;
+    var allowDuplicates = false;
     setInterval(function() {
+      if(currentPeripheral != null) {
+        return;
+      }
+
       console.log('start scanning');
       noble.startScanning(["6e400001b5a3f393e0a9e50e24dcca9e"], allowDuplicates);
       setTimeout(function() {
@@ -21,8 +27,6 @@ noble.on('stateChange', function(state) {
     noble.stopScanning();
   }
 });
-
-var currentPeripheral = null;
 
 noble.on('discover', function(peripheral) {
   if(currentPeripheral != null) {
@@ -40,6 +44,11 @@ noble.on('discover', function(peripheral) {
     peripheral.discoverSomeServicesAndCharacteristics(uartServices, uartReadCharacteristics, function(error, services, characteristics){
       if(characteristics.length == 0) {
         peripheral.disconnect();
+        return;
+      }
+      if(currentPeripheral != null) {
+        peripheral.disconnect();
+        return;
       }
 
       peripheral.removeAllListeners('disconnect');
@@ -52,7 +61,6 @@ noble.on('discover', function(peripheral) {
       console.log("UART characteristic found on: " + currentPeripheral);
 
       characteristics.forEach(function(ch, chId) {
-
         ch.removeAllListeners('data');
         ch.on('data', function(data) {
           var eulersString = data.toString().slice(0, -2);
