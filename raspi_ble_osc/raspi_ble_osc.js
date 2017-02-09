@@ -62,13 +62,22 @@ noble.on('discover', function(peripheral) {
 
       characteristics.forEach(function(ch, chId) {
         ch.removeAllListeners('data');
+        var databuf = '';
         ch.on('data', function(data) {
-          var eulersString = data.toString().slice(0, -2);
-          var eulers = data.toString().split(",");
-          if(eulers.length == 3) {
-            var e0 = parseFloat(eulers[0]);
-            var e1 = parseFloat(eulers[1]);
-            var e2 = parseFloat(eulers[2]);
+          databuf += data.toString();
+          //console.log(databuf);
+
+          var res = databuf.match(/X(-?\d+(\.\d+)?)Y(-?\d+(\.\d+))?Z(-?\d+(\.\d+))?\|(.*)/);
+          if(res) {
+            var e0 = parseFloat(res[1]);
+            var e1 = parseFloat(res[3]);
+            var e2 = parseFloat(res[5]);
+            
+            if(typeof res[7] != 'undefined')
+              databuf = res[7];
+            else
+              databuf = '';
+
             console.log(e0 + " " + e1 + " " + e2);
             client.send('/scenes/cube', e0, e1, e2, function (error) {
             });
