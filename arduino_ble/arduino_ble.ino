@@ -46,7 +46,7 @@ void setup() {
   Serial.println( F("OK!") );
 
   Serial.print(F("Factory reset: "));
-  while(! ble.factoryReset()) {
+  while (! ble.factoryReset()) {
     Serial.println(F("FAILED."));
     delay(1000);
     //while (1);
@@ -132,62 +132,49 @@ void loop() {
     Euler = quaternion.toEuler();
     Euler = Euler.scale(100);
 
-    //RGBValues[0] = map(Euler[0], -314, 314, 0, 360);
-    //RGBValues[1] = map(Euler[1], -314 / 2, 314 / 2, 0, 1);
-    //RGBValues[2] = map(Euler[2], -314, 314, 0, 1);
     int hue = 0;
-    if(Euler[0] < 0) hue += map(Euler[0], -314, 0, 0, 360 / 7);
-    else hue += map(Euler[0], 0, 314, 360 / 7, 0);
+    hue += map(Euler[0], -314, 314, 0, 360);
 
-    if(Euler[1] < 0) hue += map(Euler[1], -314 / 2, 0, 0, 360 / 7 * 2);
-    else hue += map(Euler[1], 0, 314 / 2, 360 / 7 * 2, 0);
+    hue += map(Euler[1], -314 / 2, 314 / 2, 0, 360);
 
-    if(Euler[2] < 0) hue += map(Euler[2], -314, 0, 0, 360 / 7 * 4);
-    else hue += map(Euler[2], 0, 314, 360 / 7 * 4, 0);
-/*
-        Serial.println();
-        Serial.print("E1: ,");
-        //    Serial.println(Euler[0]);
-        Serial.println(RGBValues[0]);
-        Serial.print("E2: ,");
-        //       Serial.println(Euler[1]);
-        Serial.println(RGBValues[1]);
-        Serial.print("E3: ,");
-        //        Serial.println(Euler[2]);
-        Serial.println(RGBValues[2]);
-        Serial.println();
-    */
+    hue += map(Euler[2], -314, 314, 0, 360);
+
+    hue = hue % 360;
 
     int colors[3];
     hsv2rgb(hue, 255, 255, colors);
-    //colors[0] = 255 * (2.3706743 * RGBValues[0] + -0.9000405 * RGBValues[1] + -0.4706338 * RGBValues[2]);
-    //colors[1] = 255 * (-0.5138850 * RGBValues[0] + 1.4253036 * RGBValues[1] + 0.0885814 * RGBValues[2]);
-    //colors[2] = 255 * (0.0052982 * RGBValues[0] + -0.0146949 * RGBValues[1] + 1.0093968 * RGBValues[2]);
     RGBValues[0] = colors[0];
     RGBValues[1] = colors[1];
     RGBValues[2] = colors[2];
     analogWrite(REDPIN, RGBValues[0]);
     analogWrite(GREENPIN, RGBValues[1]);
     analogWrite(BLUEPIN, RGBValues[2]);
-      Serial.print(RGBValues[0], 1);
-      Serial.print(",");
-      Serial.print(RGBValues[1], 1);
-      Serial.print(",");
-      Serial.println(RGBValues[2], 1);
+    Serial.print("X");
+    Serial.print(Euler[0], 3);
+    Serial.print("Y");
+    Serial.print(Euler[1], 3);
+    Serial.print("Z");
+    Serial.print(Euler[2], 3);
+    Serial.print("R");
+    Serial.print((int)RGBValues[0]);
+    Serial.print("G");
+    Serial.print((int)RGBValues[1]);
+    Serial.print("B");
+    Serial.print((int)RGBValues[2]);
+    Serial.println("|");
 
     bno_timer = current_timer;
   }
 
-  /*Here is where I'd put in the code to communcate over BLE
-    From what I understand about the initial project the goal is to pass either the accelrometer */
   if ((current_timer - ble_timer) >= BLE_SAMPLERATE_DELAY_MS) {
     if (ble.isConnected()) {
       ble.print("AT+BLEUARTTX=");
-      ble.print(Euler[0], 1);
-      ble.print(",");
-      ble.print(Euler[1], 1);
-      ble.print(",");
-      ble.print(Euler[2], 1);
+      ble.print("X");
+      ble.print(Euler[0], 3);
+      ble.print("Y");
+      ble.print(Euler[1], 3);
+      ble.print("Z");
+      ble.print(Euler[2], 3);
       ble.println("|");
       ble.readline(200);
     }
