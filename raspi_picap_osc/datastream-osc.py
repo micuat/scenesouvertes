@@ -114,44 +114,41 @@ while True:
   sensor.update_filtered_data()
 
   # touch values
-  touch = liblo.Message("/touch")
-  data_array = []
   for i in electrodes_range:
-    # get_touch_data returns boolean values: True or False
-    # we need to turn them into ints first: 1 or 0
-    # and then into string: "1" or "0" so we can display them
-    touch.add(int(sensor.get_touch_data(i)))
-  bundle.add(touch)
+    if sensor.get_touch_data(i):
+      touch = liblo.Message("/touched/" + str(i))
+      print "touched: " + str(i)
+      bundle.add(touch)
 
   # touch thresholds
-  tths = liblo.Message("/tths")
-  for i in electrodes_range:
-    tths.add(touch_threshold)
-  bundle.add(tths)
+  #tths = liblo.Message("/tths")
+  #for i in electrodes_range:
+  #  tths.add(touch_threshold)
+  #bundle.add(tths)
 
   # release threshold
-  rths = liblo.Message("/rths")
-  for i in electrodes_range:
-    rths.add(release_threshold)
-  bundle.add(rths)
+  #rths = liblo.Message("/rths")
+  #for i in electrodes_range:
+  #  rths.add(release_threshold)
+  #bundle.add(rths)
 
   # filtered values
-  fdat = liblo.Message("/fdat")
-  for i in electrodes_range:
-    fdat.add(sensor.get_filtered_data(i))
-  bundle.add(fdat)
+  #fdat = liblo.Message("/fdat")
+  #for i in electrodes_range:
+  #  fdat.add(sensor.get_filtered_data(i))
+  #bundle.add(fdat)
 
   # baseline values
-  bval = liblo.Message("/bval")
-  for i in electrodes_range:
-    bval.add(sensor.get_baseline_data(i))
-  bundle.add(bval)
+  #bval = liblo.Message("/bval")
+  #for i in electrodes_range:
+  #  bval.add(sensor.get_baseline_data(i))
+  #bundle.add(bval)
 
   # value pairs
-  diff = liblo.Message("/diff")
-  for i in electrodes_range:
-    diff.add(sensor.get_baseline_data(i) - sensor.get_filtered_data(i))
-  bundle.add(diff)
+  #diff = liblo.Message("/diff")
+  #for i in electrodes_range:
+  #  diff.add(sensor.get_baseline_data(i) - sensor.get_filtered_data(i))
+  #bundle.add(diff)
 
   # send our bundle to given address
   liblo.send(address, bundle)
