@@ -1,7 +1,18 @@
 var noble = require('noble');
 var osc = require('node-osc');
 
-var client = new osc.Client('10.10.30.109', 7000);
+////// IP ADDRESS //////
+var client = new osc.Client('', 7000);
+
+// logging
+var fs = require('fs');
+var util = require('util');
+var log_file = fs.createWriteStream('/home/pi/shared/scenesouvertes/raspi_ble_osc/log', {flags: 'w'});
+var log_stdout = process.stdout;
+console.log = function(d) {
+  log_file.write(util.format(d) + '\n');
+  log_stdout.write(util.format(d) + '\n');
+}
 
 var uartServices = [];
 var uartReadCharacteristics = ["6e400003b5a3f393e0a9e50e24dcca9e"];
