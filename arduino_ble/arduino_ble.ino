@@ -21,7 +21,7 @@ SoftwareSerial bluefruitSS = SoftwareSerial(TXO, RXI);
 Adafruit_BluefruitLE_UART ble(bluefruitSS, MODE, CTS, RTS);
 
 #define BNO055_SAMPLERATE_DELAY_MS (100)
-#define BLE_SAMPLERATE_DELAY_MS (200)
+#define BLE_SAMPLERATE_DELAY_MS (500)
 
 #define REDPIN 6
 #define GREENPIN 5
