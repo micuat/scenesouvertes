@@ -104,6 +104,10 @@ parse_args(sys.argv[1:])
 # setup OSC
 address = liblo.Address(host, port)
 
+touched = []
+for i in electrodes_range:
+  touched.append(False)
+
 while True:
   bundle = liblo.Bundle()
 
@@ -115,10 +119,15 @@ while True:
 
   # touch values
   for i in electrodes_range:
-    if sensor.get_touch_data(i):
-      touch = liblo.Message("/touched/" + str(i))
+    is_touched = sensor.get_touch_data(i)
+    if touched[i] == False and is_touched:
+      touch = liblo.Message("/live/play")
       print "touched: " + str(i)
       bundle.add(touch)
+      touched[i] = True
+    elif touched[i] == True and is_touched == False:
+      touched[i] = False
+  #print touched
 
   # touch thresholds
   #tths = liblo.Message("/tths")
